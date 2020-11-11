@@ -1,0 +1,50 @@
+#This script updates Active Directory groups based on a database query. 
+
+#Logging into Azure
+$username = "username_goes_here"
+$SecurePassword = Get-Content "C:\____hashed_pw.txt" | ConvertTo-SecureString
+$cred = new-object -typename System.Management.Automation.PSCredential `
+     -argumentlist $username, $SecurePassword
+
+Login-AzAccount -Credential $cred
+
+
+Function UpdateADGroup($SQLquery, $ADgroup){
+
+    Write-Output("Query: " + $SQLquery)
+       $Params = @{
+             'ServerInstance' = 'server_goes_here';
+             'Database' = 'database_name_goes_here'; 
+             'Username' = ____
+             'Password' = ____
+             'Query' = $SQLquery;
+       }
+       $users = Invoke-Sqlcmd @Params
+
+       #If there are users in the database query who are not in the AD group, this script adds those users.
+       $group = $ADgroup  
+       foreach ($user in $users) {
+             $members = Get-ADGroupMember -Identity $group | Select -ExpandProperty SamAccountName
+             If ($members -contains $user.Item("USERID")) {
+                    Write-Output ($user.Item("USERID") + " is already a member of $group")
+             } Else {
+                    Add-ADGroupMember -Identity $group -Members $user.Item("USERID")
+                    Write-Output ($user.Item("USERID") + " has been added to " +$group)
+             }
+       }
+
+       #If there are members in the AD group who are no in the database query, this script removes those users.
+       foreach ($member in $members) {
+             If ($users.userid.Contains($member)){
+                    Write-Output ($member  + " is in D365 ")
+             } Else {
+                    Remove-ADGroupMember -Identity $group -Members $member -confirm:$false
+                    Write-Output ($member  + " is not in D365 ")
+             }      
+       }
+
+}
+
+
+UpdateADGroup -SQLquery 'SELECT field FROM [dbo].[view]' -ADgroup 'AD_group_name_goes_here'
+UpdateADGroup -SQLquery 'SELECT field FROM [dbo].[view2]' -ADgroup 'AD_group2_name_goes_here'
