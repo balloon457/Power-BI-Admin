@@ -1,0 +1,13 @@
+$outputFile = "C:\put_your_path_here.csv"
+$Datasets = Get-PowerBIDataset -Scope Organization
+$results = @()
+$Datasets | 
+ForEach-Object {
+		$results +=
+        [PSCustomObject]@{
+        Name = $_.name
+		    ID = $_.ID
+		    User = $_.ConfiguredBy
+		}
+}
+$results | Export-CSV -Path $outputFile   
