@@ -1,6 +1,6 @@
 ## This script lists the users in each workspace and their security role.
 
-$outputFile = “C:\____your destination path here___"
+$outputFile = “C:\put_your_path_here.csv"
 $ActiveWorkspaces = Get-PowerBIWorkspace -Scope Organization -All | Where {($_.Type -eq "Workspace") }
 $results = @()
 $ActiveWorkspaces | 
